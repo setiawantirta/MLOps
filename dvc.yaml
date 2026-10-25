@@ -1,0 +1,31 @@
+stages:
+  bangkitkan:
+    cmd: python buat_dataset.py --keluaran data/raw --seed 42
+    deps: [buat_dataset.py]
+    outs: [data/raw/kredit_sumatera.csv]
+
+  latih:
+    cmd: python src/train.py --config conf/params.yaml --keluaran artifacts
+    deps:
+      - src/train.py
+      - src/features.py
+      - src/data.py
+      - src/evaluate.py
+      - conf/params.yaml
+      - data/raw/kredit_sumatera.csv
+    outs:
+      - artifacts/model.joblib
+      - artifacts/artefak_fitur.json
+    metrics:
+      - artifacts/metadata.json:
+          cache: false
+
+  pantau:
+    cmd: python src/monitor.py --config conf/params.yaml --artefak artifacts --keluaran laporan
+    deps:
+      - src/monitor.py
+      - artifacts/model.joblib
+      - data/raw/kredit_sumatera.csv
+    outs:
+      - laporan/drift.csv
+      - laporan/keadilan.csv

@@ -1,0 +1,60 @@
+name: CI Model Risiko Kredit
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+
+jobs:
+  mutu-kode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.10", cache: pip }
+      - run: pip install -r requirements.lock
+      - run: ruff check src tests
+      - run: python -m pytest tests/test_unit.py -q
+
+  validasi-data:
+    needs: mutu-kode
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.10", cache: pip }
+      - run: pip install -r requirements.lock
+      - run: python buat_dataset.py --keluaran data/raw --seed 42
+      - run: python -m pytest tests/test_data.py -q
+
+  validasi-model:
+    needs: validasi-data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.10", cache: pip }
+      - run: pip install -r requirements.lock
+      - run: python buat_dataset.py --keluaran data/raw --seed 42
+      - run: python src/train.py --config conf/params.yaml --keluaran artifacts
+      # Gerbang metrik dan gerbang segmen dieksekusi sebagai uji, bukan dibaca manusia
+      - run: python -m pytest tests/test_model.py tests/test_equivalence.py -q
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artefak-model
+          path: artifacts/
+
+  bangun-citra:
+    needs: validasi-model
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: artefak-model, path: artifacts }
+      - run: docker build -t skor-kredit:${{ github.sha }} .
+      - name: Uji asap
+        run: |
+          docker run -d --name uji -p 8000:8000 skor-kredit:${{ github.sha }}
+          sleep 12
+          curl -sf http://localhost:8000/health
+          docker rm -f uji

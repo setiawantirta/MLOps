@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Data besar dan artefak TIDAK masuk Git — dikelola DVC / CI
+data/raw/*.csv
+data/processed/
+artifacts/
+artifacts_*/
+laporan/
+mlruns/
+!data/raw/.gitkeep

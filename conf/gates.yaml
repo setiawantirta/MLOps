@@ -1,0 +1,25 @@
+# Kebijakan tata kelola yang DIEKSEKUSI pipeline, bukan sekadar didokumentasikan.
+tingkat_risiko: kritis
+
+kritis:
+  auc_min: 0.74
+  auc_min_per_segmen: 0.65
+  segmen_min_n: 300
+  selisih_maks_tingkat_setuju: 0.08
+  fitur_terlarang: [status_restrukturisasi, kode_pos, nama_ibu_kandung]
+  wajib_laporan_segmen: true
+  wajib_persetujuan_manusia: true
+  wajib_mode_shadow_hari: 14
+
+sedang:
+  auc_min: 0.70
+  auc_min_per_segmen: 0.60
+  segmen_min_n: 300
+  fitur_terlarang: [status_restrukturisasi]
+  wajib_laporan_segmen: true
+  wajib_persetujuan_manusia: false
+
+rendah:
+  auc_min: 0.60
+  wajib_laporan_segmen: false
+  wajib_persetujuan_manusia: false

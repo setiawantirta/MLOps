@@ -1,0 +1,15 @@
+data:
+  mentah: data/raw/kredit_sumatera.csv
+  olahan: data/processed
+  batas_latih: "2023-12"     # data <= batas ini untuk latih
+  batas_validasi: "2024-06"  # > batas_latih dan <= ini untuk validasi
+                             # > batas_validasi untuk uji out-of-time
+model:
+  algoritma: logreg             # hgb | logreg | rf
+  max_depth: 6
+  learning_rate: 0.06
+  max_iter: 250
+  random_state: 42
+biaya:
+  fn: 12000000               # rugi pokok bila gagal bayar lolos
+  fp: 1500000                # margin hilang bila nasabah baik ditolak
